@@ -7,8 +7,8 @@
 (use 'clojure.tools.trace)
 
 
-(declare prove prove-all maphash clause-body clause-head get-clauses 
-         rename-variables ?- show-prolog-solutions 
+(declare prove prove-all maphash clause-body clause-head get-clauses
+         rename-variables ?- show-prolog-solutions
          show-prolog-vars top-level-prove continue? add-builtin
          prolog-equals
          prolog-is)
@@ -28,7 +28,7 @@
         (recur
          (rest vars)
          (first (rest  vars))))))
-  
+
 ;  (if (continue?)
 ;    nil
 ;    )
@@ -163,11 +163,11 @@
   ((deref db-predicates) pred))
 
 
-; this is where we do the logic like from 
+; this is where we do the logic like from
 ; http://lib.store.yahoo.net/lib/paulgraham/onlisp.pdf
 ; remember, prove can call prove-all multiple times
 ; and prove-all can call prove multiple times
-; prove-all can call prove-all 
+; prove-all can call prove-all
 ; prove cannot call prove
 
 ; both prove-all and prove can return nil
@@ -188,16 +188,16 @@
     ;(println "clauses from pred" clauses)
     (if (consp clauses) ; we call consp clauses because sometimes the clauses variable is a function which we can call to do an operation
       ; like arithmetic or printing to O
-      
+
       ; this is the old version from peter norvig
-        
+
       (some ; why do we call some?? some think that's a very good question
        ; we call some because some returns the first value that is non-nil
        ; we could also just call prove-all on the first head-clause that unifies with goal (first param)
-       
+
        ; actually, the thing is, we have to call prove-all even if the bindings are nil.
        ; why is this?
-       
+
        ;-------------------------
        ;clojure.core/some
        ;([pred coll])
@@ -206,8 +206,8 @@
        ;this will return :fred if :fred is in the sequence, otherwise nil:
        ;(some #{:fred} coll)
        ;(some #(if (even? %) %) [1 2 3 4]) => 2
-       
-       
+
+
        (fn [clause] ; for every single clause from get-clauses, attempt
                                         ; to unify with head clause
                                         ; if it unifies, prove will be
@@ -237,14 +237,14 @@
        																												; unify will return nil if these two clauses don't unify
        																												; and prove-all returns nil if the bindings param is nil
        ; TODO: this would be much simpler if we didn't call prove-all if the bindings param was nil
-       
+
        clauses)
 
       ;; the predicate's clauses can be an atom:
       ;; a primitive function to be called
-      
+
       (clauses (rest goal) bindings other-goals)
-      ))) ; arithmetic
+      )))) ; arithmetic
 
 
 ; this is the entry/exit point
@@ -296,7 +296,7 @@
                       	(if (consp (prove-all (into (rest goals) (list (first clauses))) bindings))
                         	bindings
                         	(recur (rest clauses) other-goals)))
-                    ;(prove (first goals) bindings (rest goals))                 
+                    ;(prove (first goals) bindings (rest goals))
                     ))
                   ; that means calling prove-all on several clauses
                   true (prove (first goals) bindings (rest goals))
@@ -312,8 +312,8 @@
   ;(println "Goals" goal)
   ;(println "Bindings" bindings)
   ;(if (consp (get-clauses (predicate goal))) (println "the clauses are---------------" (clause-head (first (get-clauses (predicate goal))))))
-  (let [clauses (get-clauses (predicate goal))] 
-    (if (consp clauses) 
+  (let [clauses (get-clauses (predicate goal))]
+    (if (consp clauses)
   		(some (fn [clause] (let [new-clause (rename-variables clause)]
             (prove-all (clause-body new-clause)
                        (unify goal (clause-head new-clause) bindings))))
@@ -345,7 +345,7 @@
      s)))
 
 (def i (ref 0))
-(defn get-next-sym [] 
+(defn get-next-sym []
   (dosync (ref-set i (+ (deref i) 1)))
   (str (deref i)))
 (defn rename-variables
