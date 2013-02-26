@@ -118,7 +118,7 @@
 ; both prove-all and prove can return nil
 ; only prove-all can return bindings
 ; prove returns nil if no head clauses can unify with the goal
-(defn prove
+(deftrace prove
   "return a list of possible solutions to a goal
   change mapcat to map to see call structure"
   [goal bindings other-goals] ; goal is always one clause in single
@@ -128,6 +128,7 @@
   ; db-predicates => #<Ref@18598b6: {likes (((likes Sandy ?x) (:or (likes ?x cats) (likes ?x Lee))) ((likes Robin cats))), :show-vars #<core$show_prolog_vars prolog.core$show_prolog_vars@19cb8>}>
   ;(println (predicate goal))
   ;(println (get-clauses (predicate goal)))
+  (println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove " (subst-bindings bindings goal) " " (seq other-goals) ")"))
   (let [clauses (get-clauses (predicate goal))] ; referenced only if
                                         ; clauses is a builtin predicate, which means the clauses from the database for something like :show returned something like prolog.core/show-prolog-vars
     ;(println "clauses from pred" clauses)
@@ -197,10 +198,16 @@
 ; clauses can unify or not unify based on the bindings variable
 ; what unified before may not unify later depending on the bindings for the variables.
 ; this is how we don't go into infinite recursion (usually)
-(defn prove-all
+(deftrace prove-all
   "calls prove on every clause with whatever bindings we've got.
    will return current bindings"
   [goals bindings]
+
+  ;(println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove-all " (subst-bindings bindings (first (seq goals))) ")"))
+  (println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove-all " (seq goals) " " (if (empty? bindings) (if (= bindings nil) "nil)" (str bindings ")")))))
+	(if (not (empty? bindings))
+    (println (str "TRACE " *trace-depth* ": " (trace-indent) "... " bindings ")" )))
+
   (cond
    (= bindings nil) nil ; this is the failure code, you can do consp on the return code of prove-all to determine if prove-all failed to unify
    (empty? goals) (list bindings) ; if the return code is a list, then, consp will return true

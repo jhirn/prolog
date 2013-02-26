@@ -101,36 +101,7 @@
    true false ; if you pass anything else other than a list, it's definitely not a list
    ))
 
-
-; cdr returns the same thing for both [] lists & () lists & leaves the type intact
-;(cdr '[]) => nil
-;(cdr '()) => nil
-;(cdr '[1]) => nil
-;(cdr '(1)) => ()
-;(cdr '[1 2]) => 2
-;(cdr '(1 2)) => (2)
-;(cdr '[1 2 3]) => [2 3]
-;(cdr '(1 2 3)) => (2 3)
-; it's a replacement for rest which does undesired behavior:
-;(rest '[]) => ()
-;(rest '()) => ()
-;(rest '[1]) => ()
-;(rest '(1)) => ()
-;(rest '[1 2]) => (2)
-;(rest '(1 2)) => (2)
-;(rest '[1 2 3]) => (2 3)
-;(rest '(1 2 3)) => (2 3)
 (defn cdr [x]
-  (comment
-  (if (type? x clojure.lang.PersistentVector)
-    (cond
-     (= (count x) 0) nil
-     (= (count x) 1) nil
-     (= (count x) 2) (first (rest x))
-     true (vec (rest x)))
-    (if (empty? x)
-      nil
-      (rest x))))
   (rest x))
 
 
