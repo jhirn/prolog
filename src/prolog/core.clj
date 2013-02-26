@@ -17,7 +17,6 @@
 (defn show-prolog-vars
   "Print each variable with its binding"
   [vars bindings other-goals]
-  ;(println bindings)
   (if (nil? vars)
     (cl-format true "~&Yes")
     (loop [vars vars
@@ -28,51 +27,9 @@
         (recur
          (rest vars)
          (first (rest  vars))))))
-
-;  (if (continue?)
-;    nil
-;    )
-  (prove-all other-goals bindings)
-  )
-
-
-(defn prolog-fail [vars bindings other-goals]
-  (println "failure")
+  ; optionally call prove-all here to stop execution
+  ;(prove-all other-goals bindings)
   nil)
-
-
-(defn prolog-equals [vars bindings other-goals]
-  ;(println (first vars))
-  ;(println (subst-bindings bindings (first vars)))
-  ;(println (second vars))
-  ;(println (subst-bindings bindings (second vars)))
-  (let [x (subst-bindings bindings (first vars))
-        y (subst-bindings bindings (second vars))]
-		;(println "x is" x)
-		;(println "y is" y)
-    (if (= x y)
-      (prove-all other-goals bindings)
-      nil)))
-
-(defn prolog-add [vars bindings other-goals]
-  ;(println (first vars))
-  ;(println (subst-bindings bindings (first vars)))
-  ;(println (second vars))
-  ;(println (subst-bindings bindings (second vars)))
-  (let [x (subst-bindings bindings (first vars))
-        y (subst-bindings bindings (second vars))]
-		;(println "x is" x)
-		;(println "y is" y)
-    (if (= x y)
-      (prove-all other-goals bindings)
-      nil)))
-
-
-
-(defn prolog-is [vars bindings other-goals]
-  (println "vars are")
-  (doall (map #(println %) vars))
-  (prove-all other-goals bindings))
 
 
 (defn prolog-print
@@ -88,10 +45,7 @@
   ;(println "other goals are")
   ;(doall (map #(println %) other-goals))
   ;(println "exiting prolog print")
-  (prove-all other-goals bindings)
-  )
-
-
+  (prove-all other-goals bindings))
 
 
 ; some helper functions
@@ -106,8 +60,6 @@
 (defn in?
   "true if seq contains elm"  [elm seq]
   (some #(= elm %) seq))
-
-
 (defn not-in? [elm seq]
   (not (in? elm seq)))
 
@@ -148,14 +100,7 @@
   (dosync
    (ref-set db-predicates {}))
   (add-builtin :show-vars 'show-prolog-vars)
-  (add-builtin :print 'prolog-print)
-  (add-builtin :is 'prolog-is)
-  (add-builtin :fail 'prolog-fail)
-  (add-builtin := 'prolog-equals)
-  (add-builtin :+ 'prolog-add)
-
-  ;(add-builtin 'prolog-equals)
-  )
+  (add-builtin :print 'prolog-print))
 
 
 (defn get-clauses [pred]
@@ -181,8 +126,8 @@
   ; remember, when you're getting new clauses, your getting new clauses based on the predicate of the goal
   ; so for any () with likes in the front, it's gonna get this from the db:
   ; db-predicates => #<Ref@18598b6: {likes (((likes Sandy ?x) (:or (likes ?x cats) (likes ?x Lee))) ((likes Robin cats))), :show-vars #<core$show_prolog_vars prolog.core$show_prolog_vars@19cb8>}>
-  (println (predicate goal))
-  (println (get-clauses (predicate goal))
+  ;(println (predicate goal))
+  ;(println (get-clauses (predicate goal)))
   (let [clauses (get-clauses (predicate goal))] ; referenced only if
                                         ; clauses is a builtin predicate, which means the clauses from the database for something like :show returned something like prolog.core/show-prolog-vars
     ;(println "clauses from pred" clauses)
@@ -191,7 +136,7 @@
 
       ; this is the old version from peter norvig
 
-      (some ; why do we call some?? some think that's a very good question
+      (some ; why do we call some?? some think that's a very good question :)
        ; we call some because some returns the first value that is non-nil
        ; we could also just call prove-all on the first head-clause that unifies with goal (first param)
 
@@ -243,8 +188,7 @@
       ;; the predicate's clauses can be an atom:
       ;; a primitive function to be called
 
-      (clauses (rest goal) bindings other-goals)
-      )))) ; arithmetic
+      (clauses (rest goal) bindings other-goals))))
 
 
 ; this is the entry/exit point
@@ -303,38 +247,6 @@
                   ))))
 
 
-
-
-(comment
-(deftrace prove [goal bindings]
-  ;(println "Calling prove from" called-from)
-  ;(println "entering prove")
-  ;(println "Goals" goal)
-  ;(println "Bindings" bindings)
-  ;(if (consp (get-clauses (predicate goal))) (println "the clauses are---------------" (clause-head (first (get-clauses (predicate goal))))))
-  (let [clauses (get-clauses (predicate goal))]
-    (if (consp clauses)
-  		(some (fn [clause] (let [new-clause (rename-variables clause)]
-            (prove-all (clause-body new-clause)
-                       (unify goal (clause-head new-clause) bindings))))
-        (get-clauses (predicate goal)))
-      (clauses (rest goal) bindings))))
-
-
-; this is the entry point
-(deftrace prove-all [goals bindings]
-  ;(println "Calling prove-all from" called-from)
-  ;(println "Entering prove-all")
-  ;(println "Goals" goals)
-  ;(println "Bindings" bindings)
-  (cond
-   (= bindings nil) nil
-   (empty? goals) (list bindings)
-   true (some (fn [goal1-solution] (prove-all (rest goals) goal1-solution))
-              (prove (first goals) bindings))))
-)
-
-
 (defn sean-replace [string & replacements]
  (loop [p replacements
         s string]
@@ -372,26 +284,9 @@
 
 
 
-
-
 (defn top-level-prove [goals]
   (prove-all `(~@goals (:show-vars ~@(variables-in goals))) {}))
 
-
-(defn continue?
-  "@TODO ask user if we should stop"
-  [] true)
-
-
-(defn prolog-assert
-  [vars bindings other-goals]
-  (prove-all other-goals bindings))
-
-
-
-
-;(deftrace prove-all [a b] (prove-all a b))
-;(deftrace prove [a b c] (prove a b c))
 (clear-db)
 
 (defn test-prove []
@@ -405,27 +300,6 @@
   (<- (likes ?x ?x))
   (?- (likes Sandy ?who))
   (println "done."))
-
-
-(defn test-append []
-  (clear-db)
-  (<- (append [] ?xs ?xs))
-  (<- (append [?x ?xs] ?ys [?x ?zs])
-      (append ?xs ?ys ?zs))
-  (?- (append ?x (c d) (a b c d))))
-
-
-(defn test-member []
-  (clear-db)
-  (<- (member ?x [?x ?rest]))
-  (<- (member ?x [? ?rest]) (member ?x ?rest))
-  (?- (member a (a b)) (prolog-print true)))
-
-
-(defn test-lisp []
-  (clear-db)
-  (<- (eval-all [] []) (eval-all []))
-  (?- (eval-all () ()) (prolog-print true)))
 
 (defn -main [& args]
   (println (test-prove)))

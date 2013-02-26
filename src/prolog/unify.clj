@@ -26,7 +26,6 @@
   (unique-find-anywhere-if #'variable? exp))
 
 
-
 (defn unique-find-anywhere-if
   "return a list of leaves of tree satisfying predicate
   with duplicates removed
@@ -63,6 +62,7 @@
 (defn !blank? [x]
   (not (blank? x)))
 
+
 ; clojure cons vs conj
 ; http://stackoverflow.com/a/3009747/761726
 ; only used by subst-bindings
@@ -74,7 +74,6 @@
    		(list x) ; return x by itself
    (not (consp y)) (list x y) ; this is the same as (list x y), was (cons x (list y)) before
    true (cons x y))) ; first usage of cons
-
 
 
 ; notes to myself about types in clojure.
@@ -122,6 +121,7 @@
 ;(rest '[1 2 3]) => (2 3)
 ;(rest '(1 2 3)) => (2 3)
 (defn cdr [x]
+  (comment
   (if (type? x clojure.lang.PersistentVector)
     (cond
      (= (count x) 0) nil
@@ -131,6 +131,7 @@
     (if (empty? x)
       nil
       (rest x))))
+  (rest x))
 
 
 ; expects predicates & number of both arguments to be the same
@@ -150,6 +151,7 @@
                       (unify (first x) (first y) bindings))
    true nil)) ; function will fail if it reaches this point
 
+
 ; todo more docs but, this won't be focus of talk
 (defn unify-variables [v x bindings] ; v is var name, x is value
   (cond
@@ -163,7 +165,7 @@
    ; don't worry about the  (and *occurs-check* (occurs-check var x bindings)) fail, thing
    true (assoc bindings v x)))
 
-; todo more docs
+
 (defn occurs-check [var x bindings]
   (cond (= var x) true
         (and
@@ -175,28 +177,20 @@
         true nil))
 
 
-
-
 ; https://github.com/sneilan/clj-prolog/blob/master/src/clj_prolog/unify.clj
-; don't need these. you can just go (x bindings).
 (defn get-binding
   "Find a (var value) pair in the binding list"
   [var bindings]
   (first (filter #(= (first %) var) bindings)))
-
-
 (defn binding-val [binding]
   "Given a binding pair, return the value"
   (second binding))
-
-
 (defn lookup [var bindings]
   "Get the value part (for var) from a binding list"
   (binding-val (get-binding var bindings)))
 
 
 (defn subst-bindings [bindings x]
-  ;(assert (not (nil? x)))
   (cond
    (= bindings nil) nil
    (= bindings {}) x
@@ -215,4 +209,5 @@
      (not binding) (assoc bindings v input)
      (= input binding) bindings
      true nil)))
+
 
