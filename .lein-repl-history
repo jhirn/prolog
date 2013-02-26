@@ -52,3 +52,17 @@ cdr
 (<- (day-dreaming ?x) (distracted ?x))
 (<- (distracted sean))
 (?- (day-dreaming ?x))
+(<- (day-dreaming ?x) (distracted ?x))
+(<- (distracted sean))
+(?- (day-dreaming ?x))
+q
+(<- (day-dreaming ?x) (distracted ?x))
+(<- (distracted sean))
+(?- (day-dreaming ?x))
+(<- (day-dreaming ?x) (distracted ?x))
+(<- (distracted sean))
+(?- (day-dreaming ?x))
+q
+(test-prove)
+q
+(test-prove)

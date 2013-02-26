@@ -176,6 +176,9 @@
                                         ; unified with the head clause
                                         ; of yet another clause
          (let [new-clause (rename-variables clause)] ; each clause is a group of terms in parenthesis
+          (println (str "TRACE " *trace-depth* ": " (trace-indent) "attempting to unify " (subst-bindings bindings goal) " with " (subst-bindings bindings (clause-head new-clause))))
+          ;(println (str "TRACE " *trace-depth* ": " (trace-indent) "exact call is (unify " goal " " (clause-head new-clause) " " bindings ")"))
+          (println (str "TRACE " *trace-depth* ": " (trace-indent) "complete fact/rule is " clause ))
           (prove-all
             ; puts clause body at beginning
             (concat (clause-body new-clause) other-goals) ; goals
@@ -202,11 +205,12 @@
   "calls prove on every clause with whatever bindings we've got.
    will return current bindings"
   [goals bindings]
-
-  ;(println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove-all " (subst-bindings bindings (first (seq goals))) ")"))
-  (println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove-all " (seq goals) " " (if (empty? bindings) (if (= bindings nil) "nil)" (str bindings ")")))))
-	(if (not (empty? bindings))
-    (println (str "TRACE " *trace-depth* ": " (trace-indent) "... " bindings ")" )))
+  (if (= bindings nil) 
+    (println (str "TRACE " *trace-depth* ": " (trace-indent) "didn't unify"))
+    (do
+      (println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove-all " (seq goals) " " (if (empty? bindings) (if (= bindings nil) "nil)" (str bindings ")")))))
+      (if (not (empty? bindings))
+        (println (str "TRACE " *trace-depth* ": " (trace-indent) "... " bindings ")" )))))
 
   (cond
    (= bindings nil) nil ; this is the failure code, you can do consp on the return code of prove-all to determine if prove-all failed to unify
