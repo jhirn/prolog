@@ -15,7 +15,8 @@
 
 
 (defn show-prolog-vars
-  "Print each variable with its binding"
+  "Print each variable with its binding
+   is only inserted as the last clause of queries."
   [vars bindings other-goals]
   (if (nil? vars)
     (cl-format true "~&Yes")
@@ -29,6 +30,10 @@
          (first (rest  vars))))))
   ; optionally call prove-all here to stop execution
   ;(prove-all other-goals bindings)
+
+  ; by returning nil instead, we make prove try the next clause
+  ; if we returned {} instead or called prove-all (which would return {} or some bindings)
+  ; the execution would stop
   nil)
 
 
@@ -128,7 +133,14 @@
   ; db-predicates => #<Ref@18598b6: {likes (((likes Sandy ?x) (:or (likes ?x cats) (likes ?x Lee))) ((likes Robin cats))), :show-vars #<core$show_prolog_vars prolog.core$show_prolog_vars@19cb8>}>
   ;(println (predicate goal))
   ;(println (get-clauses (predicate goal)))
-  (println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove " (subst-bindings bindings goal) " " (seq other-goals) ")"))
+ 
+  (if (= bindings nil)
+    (println (str "TRACE " *trace-depth* ": " (trace-indent) "didn't unify"))
+    (do 
+      (println (str "TRACE " *trace-depth* ": " (trace-indent) "(prove " (subst-bindings bindings goal)))
+      (println (str "TRACE " *trace-depth* ": " (trace-indent) "... " (if (empty? bindings) "nil" bindings)))
+      (println (str "TRACE " *trace-depth* ": " (trace-indent) "... " (if (empty? other-goals) "nil" (seq other-goals)) ")")))) 
+
   (let [clauses (get-clauses (predicate goal))] ; referenced only if
                                         ; clauses is a builtin predicate, which means the clauses from the database for something like :show returned something like prolog.core/show-prolog-vars
     ;(println "clauses from pred" clauses)
